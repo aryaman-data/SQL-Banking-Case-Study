@@ -41,15 +41,15 @@ trans_action(customer_id INT,        txn_date DATE,      txn_type VARCHAR(50),  
 Before running the queries, the `txn_date` column was cleaned and converted from a string format to a proper `DATE` type:
 
 ```sql
--- Step 1: Convert string dates to ISO format
+--  Converting string dates to ISO format
 UPDATE trans_action 
 SET txn_date = CONVERT(CHAR(10), CONVERT(DATE, txn_date, 105), 126);
 
--- Step 2: Alter column type to DATE
+--  Alter column type to DATE
 ALTER TABLE trans_action
 ALTER COLUMN txn_date DATE;
 
--- Step 3: Alter txn_amount to INT
+-- Alter txn_amount to INT
 ALTER TABLE trans_action
 ALTER COLUMN txn_amount INT;
 ```
