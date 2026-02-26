@@ -228,13 +228,13 @@ WHERE region_id = 3;
 --12--
 BEGIN TRY
     SELECT 
-        -- Combining ID and Name into one column named 'Region_Details'
+        
         CONCAT(region_id, ' - ', region_name) AS Region_Details
     FROM Continent;
 END TRY
 
 BEGIN CATCH
-    -- This block executes if there is an error (e.g., table doesn't exist)
+    
     SELECT 
         ERROR_NUMBER() AS ErrorNumber,
         ERROR_MESSAGE() AS ErrorMessage;
@@ -294,21 +294,21 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
-    -- Handle UPDATES
+    
     IF EXISTS (SELECT 1 FROM inserted) AND EXISTS (SELECT 1 FROM deleted)
     BEGIN
         INSERT INTO trans_action_Audit (customer_id, txn_amount_old, txn_amount_new, ActionType, ChangedBy)
         SELECT 
             i.customer_id, 
-            d.txn_amount, -- Old value from 'deleted' table
-            i.txn_amount, -- New value from 'inserted' table
+            d.txn_amount, 
+            i.txn_amount, 
             'UPDATE', 
             SYSTEM_USER
         FROM inserted i
         JOIN deleted d ON i.customer_id = d.customer_id;
     END
 
-    -- Handle DELETES
+    
     IF EXISTS (SELECT 1 FROM deleted) AND NOT EXISTS (SELECT 1 FROM inserted)
     BEGIN
         INSERT INTO trans_action_Audit (customer_id, txn_amount_old, ActionType, ChangedBy)
@@ -322,12 +322,12 @@ BEGIN
 END;
 GO
 
--- 1. Perform an update
+
 UPDATE trans_action 
 SET txn_amount = 500 
 WHERE customer_id = 1 AND txn_type = 'deposit';
 
--- 2. View the audit trail
+
 SELECT * FROM trans_action_Audit;
 
 
@@ -337,14 +337,12 @@ ON ALL SERVER
 FOR LOGON
 AS
 BEGIN
-    -- We check the number of active sessions for the current Login Name
-    -- We exclude internal system processes (background tasks)
     IF (SELECT COUNT(*) 
         FROM sys.dm_exec_sessions 
         WHERE is_user_process = 1 
         AND login_name = ORIGINAL_LOGIN()) > 1
     BEGIN
-        -- ROLLBACK cancels the login attempt
+        
         ROLLBACK;
         PRINT 'Access Denied: You already have an active session.';
     END
@@ -376,7 +374,7 @@ SELECT
     ISNULL(withdrawal, 0) AS Total_Withdrawal
 FROM 
 (
-    -- 1. Source data: Select the columns we need
+    
     SELECT 
         customer_id, 
         txn_type, 
@@ -385,12 +383,13 @@ FROM
 ) AS SourceTable
 PIVOT 
 (
-    -- 2. Aggregate the values
+    
     SUM(txn_amount) 
-    -- 3. Define the column headers (must match values in txn_type column)
+    
     FOR txn_type IN (deposit, purchase, withdrawal)
 ) AS PivotTable
 ORDER BY customer_id;
 
 --****************************************************************************************************--
+
 
